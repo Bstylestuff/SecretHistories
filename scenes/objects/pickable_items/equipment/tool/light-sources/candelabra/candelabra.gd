@@ -38,7 +38,8 @@ func _ready():
 	light_timer = $Timer
 	if light_timer == null:
 		print(self.name)
-	self.connect("item_is_dropped", Callable(self, "light_dropped")) # this current fails, is bugged
+	#self.connect("item_is_dropped", Callable(self, "light_dropped")) # this current fails, is bugged
+	item_dropped.connect(light_dropped)
 	light_timer.connect("timeout", Callable(self, "light_depleted_copy"))
 	burn_time = 1000.0
 	light_timer.set_wait_time(burn_time)

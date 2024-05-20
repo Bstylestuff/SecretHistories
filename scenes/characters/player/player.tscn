@@ -436,6 +436,7 @@ input_5/reset = true
 [sub_resource type="AnimationNodeOneShot" id="437"]
 
 [sub_resource type="AnimationNodeBlendTree" id="365"]
+graph_offset = Vector2(-877.052, -849.934)
 nodes/Animation/node = SubResource("417")
 nodes/Animation/position = Vector2(-700, -500)
 "nodes/Animation 10/node" = SubResource("442")
@@ -780,6 +781,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
+[node name="Speech" parent="Audio" index="0"]
+max_polyphony = 50
+
+[node name="Manipulation" parent="Audio" index="1"]
+max_polyphony = 80
+
+[node name="Movement" parent="Audio" index="2"]
+max_distance = 30.0
+max_polyphony = 50
+
 [node name="NoiseTimer" type="Timer" parent="Audio" index="3"]
 wait_time = 0.2
 one_shot = true
@@ -1094,6 +1105,7 @@ shape = SubResource("41")
 
 [node name="AudioListener3D" type="AudioListener3D" parent="FPSCamera" index="5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00348801, -0.204722, 0.2)
+current = true
 
 [node name="Listener2" type="AudioListener3D" parent="FPSCamera" index="6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00348801, -0.204722, 0.2)

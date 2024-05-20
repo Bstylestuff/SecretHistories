@@ -11,7 +11,7 @@ var burn_time : float
 var is_depleted : bool = false
 var is_dropped: bool = false
 var is_just_dropped: bool = true
-var light_timer
+var light_timer:Timer
 var random_number
 @export var life_percentage_lose : float = 0.0 # (float, 0.0, 1.0)
 @export var prob_going_out : float = 0.0 # (float, 0.0, 1.0)
@@ -24,9 +24,14 @@ var new_material
 
 func _ready() -> void:
 	light_timer = $BurnTime
-	self.connect("item_is_dropped", Callable(self, "item_drop"))
-	if not light_timer.is_connected("timeout", Callable(self, "_light_depleted")):
-		light_timer.connect("timeout", Callable(self, "_light_depleted"))
+	##Just... why? If item_is_dropped is emitted by self, why not call item_drop instead?
+	##self.connect("item_is_dropped", Callable(self, "item_drop"))
+	item_is_dropped.connect(item_drop)
+	##Again, like in the other files, no such thing as _light_depleted
+	#if not light_timer.is_connected("timeout", Callable(self, "_light_depleted")):
+	#	light_timer.connect("timeout", Callable(self, "_light_depleted"))
+	if not light_timer.is_connected("timeout", Callable(self, "_on_light_depleted")):
+		light_timer.timeout.connect(_on_light_depleted)
 	burn_time = 3600.0
 	light()
 

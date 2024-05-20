@@ -13,13 +13,13 @@ signal used_unload()
 
 @export var item_name : String = "Equipment"
 @export var horizontal_holding : bool = false
-@export var normal_pos_path : NodePath
+#@export var normal_pos_path : NodePath
 @export var throw_pos_path : NodePath
 
 var is_in_belt = false
 
 @onready var hold_position = %HoldPosition
-@onready var normal_pos = get_node(normal_pos_path)   # this still used?
+#@onready var normal_pos = get_node(normal_pos_path)   # this still used?
 @onready var throw_pos = get_node(throw_pos_path)   # this still used?
 
 
@@ -44,7 +44,7 @@ func _physics_process(delta):
 func apply_throw_logic():
 	if thrown_point_first:
 		print("Applying throw logic")
-		self.global_rotation = throw_pos.global_rotation   # This attempts to align the point forward when throwing piercing weapons
+		#self.global_rotation = throw_pos.global_rotation   # This attempts to align the point forward when throwing piercing weapons
 	if can_spin:
 		print("Item spins when thrown")
 		angular_velocity = Vector3(global_transform.basis.x * -15)

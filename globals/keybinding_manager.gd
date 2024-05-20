@@ -3,7 +3,7 @@ extends Node
 
 var file_name = "%s://globals/settings/keybinding.dict" % ("user" if OS.has_feature("standalone") else "res")
 var file_name_default = "%s://globals/settings/default_keys.dict" % ("user" if OS.has_feature("standalone") else "res")
-
+##TODO: those files do NOT exist by default, make sure to save them if the file does not exist
 var setting_key = false
 var keys_default : Dictionary
 
@@ -42,11 +42,15 @@ func gen_dict_from_input_map() -> Dictionary:
 
 # We'll use this when the game loads
 func load_keys():
+	##TODO: see line 6, something is off, apparently
 	if(FileAccess.file_exists(file_name)):
+		print("File exists")
 		var file_str = FileAccess.get_file_as_string(file_name)
 		var data = str_to_var(file_str)
 		if(typeof(data) == TYPE_DICTIONARY):
 			setup_keys(data)
+			print("DATA")
+			print(str(data))
 		else:
 			printerr("corrupted data!")
 	else:
@@ -126,6 +130,7 @@ func str2event(string : String) -> InputEvent:
 
 
 func save_keys():
+	print("SAVING KEYS")
 	var key_dict = gen_dict_from_input_map()
 	var file = FileAccess.open(file_name, FileAccess.WRITE)
 	file.store_string(var_to_str(key_dict))
@@ -136,6 +141,9 @@ func save_keys():
 func save_default_keys():
 	var key_dict = gen_dict_from_input_map()
 	var file = FileAccess.open(file_name_default, FileAccess.WRITE)
+	print("SAVING KEY: ")
+	print(key_dict)
+	print(var_to_str(key_dict))
 	file.store_string(var_to_str(key_dict))
 	file.close()
 	print("saved keys")

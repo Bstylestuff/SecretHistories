@@ -86,6 +86,7 @@ visible = false
 layout_mode = 2
 
 [node name="Timer" type="Timer" parent="."]
+one_shot = true
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5")

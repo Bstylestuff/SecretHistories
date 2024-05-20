@@ -36,6 +36,7 @@ var shard_has_spawned = false    # Tracks if the shard has spawned yet, so only 
 
 @onready var world_root : Node = $World
 @onready var ui_root : CanvasLayer = $GameUI
+##What is the purpose of this? It's never used
 @onready var local_settings : SettingsClass = %LocalSettings
 @onready var world_environment: WorldEnvironment = $WorldEnvironment
 
@@ -133,7 +134,7 @@ func spawn_player():
 	await player.ready
 	emit_signal("player_spawned", player)
 	
-	LoadScene.emit_signal("scene_loaded")
+	#LoadScene.emit_signal("scene_loaded")
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -159,9 +160,6 @@ func disconnect_staircase_events() -> void:
 		# warning-ignore:return_value_discarded
 		Events.disconnect("down_staircase_used", Callable(self, "_on_Events_down_staircase_used"))
 
-func _check_if_loadscreen_freed():
-	return !is_instance_valid(LoadScene.loadscreen)
-
 ### -----------------------------------------------------------------------------------------------
 
 
@@ -174,18 +172,10 @@ func _on_first_level_loaded(_level : GameWorld):
 
 
 func _handle_floor_change(is_going_downstairs: bool) -> void:
-	await _show_load_screen()
 	_handle_floor_levels()
 	await load_level(start_level_scn)
 	_set_new_position_for_player(is_going_downstairs)
 	LoadScene.emit_signal("scene_loaded")
-
-
-func _show_load_screen() -> void:
-	LoadScene.setup_loadscreen()
-	# Wait a bit so that the load screen is visible
-	await get_tree().create_timer(0.1).timeout
-
 
 func _handle_floor_levels() -> void:
 	world_root.remove_child(level)
@@ -202,32 +192,32 @@ func _set_new_position_for_player(is_going_downstairs: bool) -> void:
 
 
 func _on_Events_up_staircase_used() -> void:
-	if _check_if_loadscreen_freed():   # Wait a few seconds before can go back up
-		var old_value := current_floor_level
-		current_floor_level = int(min(HIGHEST_FLOOR_LEVEL, current_floor_level + 1))
-		var has_changed := old_value != current_floor_level
-		
-		if has_changed:
-			print("Floor level changed from: %s to: %s" % [old_value, current_floor_level])
-			await _handle_floor_change(false)
-		elif current_floor_level == HIGHEST_FLOOR_LEVEL:
-			if player.inventory.bulky_equipment is ShardOfTheComet:
-				print("Win screen")
-				get_tree().change_scene_to_file("res://scenes/ui/victory_screen.tscn")
-			else:
-				print("You're already at the top of the dungeon, can't go up.")
+	var old_value := current_floor_level
+	current_floor_level = int(min(HIGHEST_FLOOR_LEVEL, current_floor_level + 1))
+	var has_changed := old_value != current_floor_level
+	
+	if has_changed:
+		print("Floor level changed from: %s to: %s" % [old_value, current_floor_level])
+		await _handle_floor_change(false)
+	elif current_floor_level == HIGHEST_FLOOR_LEVEL:
+		if player.inventory.bulky_equipment is ShardOfTheComet:
+			print("Win screen")
+			get_tree().change_scene_to_file("res://scenes/ui/victory_screen.tscn")
+		else:
+			print("You're already at the top of the dungeon, can't go up.")
 
 
 func _on_Events_down_staircase_used() -> void:
-	if _check_if_loadscreen_freed():   # Wait a few seconds before can go back down
-		var old_value := current_floor_level
-		current_floor_level = int(max(LOWEST_FLOOR_LEVEL, current_floor_level - 1))
-		var has_changed := old_value != current_floor_level
-		
-		if has_changed:
-			print("Went down from: %s to: %s" % [old_value, current_floor_level])
-			await _handle_floor_change(true)
-		elif current_floor_level == LOWEST_FLOOR_LEVEL:
-			print("You're already at the bottom of the dungeon, can't go lower.")
+	var old_value := current_floor_level
+	current_floor_level = int(max(LOWEST_FLOOR_LEVEL, current_floor_level - 1))
+	var has_changed := old_value != current_floor_level
+	
+	if has_changed:
+		print("Went down from: %s to: %s" % [old_value, current_floor_level])
+		await _handle_floor_change(true)
+	elif current_floor_level == LOWEST_FLOOR_LEVEL:
+		print("You're already at the bottom of the dungeon, can't go lower.")
 
 ### -----------------------------------------------------------------------------------------------
+
+

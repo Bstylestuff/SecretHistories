@@ -18,3 +18,8 @@ data_*/
 *.directory
 
 # Note - open issue, we want to avoid merging .blend and .spp etc large files into main...how?
+*.zip
+*.exe
+*.pck
+*.import
+

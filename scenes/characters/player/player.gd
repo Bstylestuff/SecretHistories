@@ -44,7 +44,8 @@ func _process(delta: float) -> void:
 	if is_reloading == true:
 		if noise_level < 8:
 			noise_level = 8
-			$Audio/NoiseTimer.start()
+			##What is this?
+			##$Audio/NoiseTimer.start()
 			
 	if light_level > 0.003:   # Maybe ensure this is the same as the detection light-level as another way for the player to know when they're in darkness
 #		$KinestheticSense.visible = false

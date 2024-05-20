@@ -11,7 +11,7 @@ func _input(event):
 	if self.visible == true:
 		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("ui_accept"):
 			_start_game()
-			queue_free()
+			#queue_free()
 
 
 func show_intro():
@@ -23,7 +23,7 @@ func show_intro():
 
 func _start_game():
 	emit_signal("intro_done")
-
+	queue_free()
 
 func _on_AnimationPlayer_animation_finished(anim_name):
 	_start_game()

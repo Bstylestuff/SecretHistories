@@ -35,7 +35,12 @@ var did_a_cut = false
 var on_cooldown = false
 
 @onready var melee_hitbox = $Hitbox as Area3D
-
+##For some reason, you try to get a HoldPosition, but named it PlacementAnchor here.
+##From what I can tell, git history says crazy_stewie did it
+##Without changing the scene yet, I will just overwrite it here
+func _ready():
+	hold_position = %PlacementAnchor
+	super._ready()
 
 func attack_thrust():
 	can_hit = true

@@ -3,8 +3,11 @@ extends Node3D
 
 
 # TODO: Eventually get working or ensure working different footstep sounds
-@onready var _footstep_sounds : Array = _stone_footstep_sounds   # Unsure if onready needed
-var _stone_footstep_sounds : Array = []
+@onready var _footstep_sounds : Array = _stone_footstep_sounds   # Unsure if onready needed ##Yes, does not help to tell it it's an empty array
+## I have set it to
+var _stone_footstep_sounds : Array = [load("res://resources/sounds/footsteps/stone_footsteps/footstep_1.wav"), load("res://resources/sounds/footsteps/stone_footsteps/footstep_2.wav"),
+									  load("res://resources/sounds/footsteps/stone_footsteps/footstep_3.wav"), load("res://resources/sounds/footsteps/stone_footsteps/footstep_4.wav"),
+									  load("res://resources/sounds/footsteps/stone_footsteps/footstep_5.wav"), load("res://resources/sounds/footsteps/stone_footsteps/footstep_6.wav")]
 var _wood_footstep_sounds : Array = []
 var _carpet_footstep_sounds : Array = []
 var _water_footstep_sounds : Array = []
@@ -62,15 +65,23 @@ var _current_sound_dir : String = ""
 
 @onready var speech_audio = $Speech as AudioStreamPlayer3D
 @onready var manipulation_audio = $Manipulation as AudioStreamPlayer3D
-@onready var movement_audio = $Movement as AudioStreamPlayer3D
+@onready var movement_audio: AudioStreamPlayer3D = $Movement as AudioStreamPlayer3D
 
 var last_speech_type   # Tracked to avoid interrupting self to say same type of thing
 @onready var last_speech_line   # Tracked to avoid repeating the same line
 
-
+## Why is loading a large amount of files in the _ready function a bad idea:
+#	1-> _ready gets called when the node enters the tree.
+#		This means, every time you spawn a player, enemy, etc, they will have to wait for let's say 6 files * 10 categories,
+#       that's 60 disk look-ups. 
+#   2-> memory use. If every character has their own 60 sounds, that means 55-200kb * 60 PER CHARACTER, so maybe 
+#       3.3-12mb of ram abused per character. one player, 12 mb, one player and 10 enemies, that's 132mb for no reason
+#  In a larger, audio dedicated commit, TODO: have static sound libraries, maybe even a data structure, holding sound and type, because 
+#    nobody will remember in one month that they need to load joke voicelines with 31 or firebreathing sound for the dragon with 64 at the end 
 func _ready():
-	# Movement audio	
-	load_sounds("resources/sounds/footsteps/stone_footsteps", 3)
+	# Movement audio
+	##Those should be constants, maybe even a nice constant dictionary
+	#load_sounds("resources/sounds/footsteps/stone_footsteps", 3)
 	#load_sounds("resources/sounds/footsteps/wood_footsteps", 4)
 	#load_sounds("resources/sounds/footsteps/water_footsteps", 5)
 	load_sounds("resources/sounds/footsteps/gravel_footsteps", 6)
@@ -84,7 +95,9 @@ func _ready():
 	choose_voice()   # Choose one from the appropriate voices for this character
 	pitch_alter_voice()   # Randomly alter pitch of this character's voice up or down some
 
-
+##NO
+##Type should NOT be an int. Say you're loading a sound from wherever on the character, how are you supposed to guess what number to add?
+##ENUM is the way
 func load_sounds(sound_dir, type : int) -> void:
 	if sound_dir == "":
 		return
@@ -97,7 +110,8 @@ func load_sounds(sound_dir, type : int) -> void:
 	if sound_dir.ends_with("/"):
 		sound_dir.erase(sound_dir.length() - 1, 1)
 
-	if sound_dir.begins_with("res://"):
+	##Issue: negate the if-> if already begins, why add? makes the dir res://res://resources/sounds/footsteps/stone_footsteps/
+	if !sound_dir.begins_with("res://"):
 		sound_dir = "res://" + sound_dir
 
 	var snd_dir = DirAccess.open(sound_dir)
@@ -112,7 +126,13 @@ func load_sounds(sound_dir, type : int) -> void:
 
 	var sound = snd_dir.get_next()
 	while sound != "":
-		if not sound.ends_with(".import") and (sound.ends_with(".wav") or sound.ends_with(".ogg") or sound.ends_with(".mp3")):
+		if (not sound.ends_with(".import") and 
+				(sound.ends_with(".wav") or 
+				 sound.ends_with(".ogg") or 
+				 sound.ends_with(".mp3"))
+				):
+		#Ambiguous logic
+		#if not sound.ends_with(".import") and (sound.ends_with(".wav") or sound.ends_with(".ogg") or sound.ends_with(".mp3")):
 			match type:
 				# Movement
 #				0:
@@ -437,15 +457,27 @@ func _on_BT_Reload_Gun_character_reloaded():
 
 
 # Movement
-
+##Does not make much sense when you think about it, having two different volume controls
 func play_footstep_sound(rate : float = 0.0, pitch : float = 1.0, volume : float = 0.0):
-	movement_audio.volume_db = rate
-	movement_audio.pitch_scale = pitch
-	movement_audio.volume_db = volume
-	if _footstep_sounds.size() > 0:
-		_footstep_sounds.shuffle()
-		movement_audio.stream = _footstep_sounds.front()
+	if(!movement_audio.playing or movement_audio.stream == null):
+		print("PLAYING FOOTSTEP SOUNDS")
+		movement_audio.volume_db = rate * 10
+		movement_audio.pitch_scale = pitch
+		movement_audio.autoplay = false
+		#movement_audio.volume_db = volume
+		##Figure out what you are stepping on first, do NOT use _footstep_sounds as an array
+		#if _footstep_sounds.size() > 0:
+			#_footstep_sounds.shuffle()
+			#movement_audio.stream = _footstep_sounds.front()
+			#movement_audio.play()
+		if _stone_footstep_sounds.size() > 0:
+			#_stone_footstep_sounds.shuffle()
+			movement_audio.stream = _stone_footstep_sounds.front()
+			#movement_audio.stream = load("res://resources/sounds/footsteps/stone_footsteps/footstep_10.wav")
+			print(_stone_footstep_sounds.front())
 		movement_audio.play()
+	else:
+		print("Already playing")
 
 
 func play_land_sound():

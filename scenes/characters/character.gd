@@ -2,7 +2,7 @@ class_name Character
 extends CharacterBody3D
 
 # TODO: This script is a dog's dinner - needs total redesign
-
+# TODO: change the audio node structure to a proper scene that can be imported wherever necessary, as it will make errors or issues much rarer
 
 signal character_died()
 signal is_hit(current_health)
@@ -157,8 +157,8 @@ var noise_level : float = 0   # Noise detectable by characters; is a float for s
 var is_reloading = false
 
 @onready var state := CharacterState.new(self)
-
-@onready var skeleton = %Skeleton3D
+##TODO: skeleton removed because was null on player
+#@onready var skeleton = %Skeleton3D
 @onready var inventory = $Inventory
 @onready var mainhand_equipment_root = %MainHandEquipmentRoot
 @onready var offhand_equipment_root = %OffHandEquipmentRoot
@@ -336,7 +336,8 @@ func damage(value : int, type : int, on_hitbox : Hitbox):
 				self.inventory.drop_offhand_item()
 				
 #				self.queue_free()
-				skeleton.physical_bones_start_simulation()   # This ragdolls
+				##TODO: remove comment
+				##skeleton.physical_bones_start_simulation()   # This ragdolls
 				if is_instance_valid($Audio/Speech):
 					$Audio/Speech.volume_db = -80
 					$Audio/Speech.stop()
@@ -441,6 +442,7 @@ func _walk(delta, speed_mod : float = 1.0) -> void:
 		self.emit_signal("is_moving", is_player_moving)
 	
 	if is_on_floor() and is_jumping:   # previously had: and _camera.stress < 0.1
+		##If this is a character, why does the player land?
 		self.emit_signal("player_landed")
 		_audio_player.play_land_sound()
 		_camera.add_stress(0.25)

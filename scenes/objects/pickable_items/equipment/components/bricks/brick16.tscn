@@ -31,6 +31,7 @@ radius = 0.101082
 mass = 2.0
 item_size = 0
 item_name = "Brick"
+throw_pos_path = NodePath("PlacementAnchor")
 item_drop_sound = ExtResource("1")
 item_throw_sound = ExtResource("3")
 

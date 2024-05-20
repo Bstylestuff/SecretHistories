@@ -159,6 +159,8 @@ func update_navigation():
 			for hole in holes:
 #				print(var2str(hole))
 				navigation_polygon.add_outline(hole)
+				
+			##TODO: update to NavigationServer2D.parse_source_geometry_data() and  NavigationServer2D.bake_from_source_geometry_data()
 			navigation_polygon.make_polygons_from_outlines()
 			
 			var vertices_3d = PackedVector3Array()

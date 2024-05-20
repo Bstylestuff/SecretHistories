@@ -11,7 +11,7 @@ var burn_time : float
 var is_depleted : bool = false
 var is_dropped: bool = false
 var is_just_dropped: bool = true
-var light_timer
+var light_timer:Timer
 var random_number
 @export var life_percentage_lose : float = 0.0 # (float, 0.0, 1.0)
 @export var prob_going_out : float = 0.0 # (float, 0.0, 1.0)
@@ -21,7 +21,10 @@ var random_number
 
 func _ready():
 	light_timer = $BurnTime
-	light_timer.connect("timeout", Callable(self, "light_depleted"))
+	##Again, connect using proper way, and there is NO light_depleted, just an _on_light_depleted
+	#light_timer.connect("timeout", Callable(self, "light_depleted"))
+	
+	light_timer.timeout.connect(_on_light_depleted)
 	burn_time = 600.0
 #	light_timer.set_wait_time(burn_time)
 #	light_timer.start()

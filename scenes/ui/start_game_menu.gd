@@ -2,13 +2,14 @@ extends Control
 
 
 const GAME_SCENE = preload("res://scenes/game.tscn")
-
-var game : Game
-
+var game
 
 func _ready() -> void:
 	game = GAME_SCENE.instantiate()
+	##Why are any of the following lines necessary?
+	##11 adds a STATIC scene's unchanged node's data to a node's variables here?
 	%StartGameSettings.attach_settings(game.get_node("%LocalSettings"))
+	##13 does the same to a different UI node?
 	%SettingsUI.attach_settings(game.get_node("%LocalSettings"), false)
 	BackgroundMusic.volume_db = -10
 
@@ -36,6 +37,7 @@ func _on_StartGame_pressed() -> void:
 	BackgroundMusic.stop()
 	$AudioStreamPlayer.play()
 	$Timer.start(3)
+	#It was NOT one shot, so it would attempt to show intro multiple times
 
 
 func _on_Timer_timeout():
@@ -45,7 +47,9 @@ func _on_Timer_timeout():
 func _on_GameIntro_intro_done():
 	GameManager.is_player_dead = false
 	GameManager.act = 1
-	LoadScene.change_scene_to_file(game)
+	##ISSUE: if changing to a file, don't change to an instantiated scene. It expects a PATH
+	LoadScene.change_scene_to_file("res://scenes/game.tscn")
+	#LoadScene.change_scene_to_file("res://scenes/game.tscn")
 
 
 func _on_ReturnButton_pressed() -> void:
