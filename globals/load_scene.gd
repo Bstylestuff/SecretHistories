@@ -4,6 +4,8 @@ const Loadscreen = preload("res://scenes/ui/loadscreen/load_screen.tscn")
 var next_scene : String 
 var target_node : Node = null
 var loading : bool = false
+#ONLY used for debug menu
+signal loading_screen_removed
 
 ##To be used when changing to a different scene (menu to game, game to menu, game to credits, etc)
 func change_scene_to_file(path : String) -> void:
@@ -21,5 +23,8 @@ func load_level(path :String, target : Node, load_screen : LoadScreen):
 func clear_data():
 	next_scene = ""
 	target_node = null
-	await get_tree().create_timer(0.4).timeout #not certain if required
+	
 	loading = false
+	#Only for debug menu
+	loading_screen_removed.emit()
+	
