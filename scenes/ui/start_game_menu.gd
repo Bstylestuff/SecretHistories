@@ -7,9 +7,11 @@ var game : Game
 
 
 func _ready() -> void:
+	##TODO: remove this, unify settings so as to not need loading the game while in a menu
 	game = GAME_SCENE.instantiate()
 	%StartGameSettings.attach_settings(game.get_node("%LocalSettings"))
 	%SettingsUI.attach_settings(game.get_node("%LocalSettings"), false)
+	#This does nothing
 	BackgroundMusic.volume_db = -10
 
 
@@ -45,7 +47,7 @@ func _on_Timer_timeout():
 func _on_GameIntro_intro_done():
 	GameManager.is_player_dead = false
 	GameManager.act = 1
-	LoadScene.change_scene_to_file(game)
+	LoadScene.change_scene_to_file("res://scenes/game.tscn")
 
 
 func _on_ReturnButton_pressed() -> void:

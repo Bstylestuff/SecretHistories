@@ -38,6 +38,7 @@ var shard_has_spawned = false    # Tracks if the shard has spawned yet, so only 
 @onready var ui_root : CanvasLayer = $GameUI
 @onready var local_settings : SettingsClass = %LocalSettings
 @onready var world_environment: WorldEnvironment = $WorldEnvironment
+@onready var load_screen: LoadScreen = $Loading
 
 #--- private variables - order: export > normal var > onready -------------------------------------
 
@@ -54,6 +55,7 @@ func _init():
 
 
 func _ready():
+	
 	set_brightness()
 	for floor_index in range(HIGHEST_FLOOR_LEVEL, LOWEST_FLOOR_LEVEL - 1, -1):
 		_loaded_levels[floor_index] = null
@@ -61,7 +63,7 @@ func _ready():
 	await get_tree().create_timer(1).timeout
 	var _error = connect("level_loaded", Callable(self, "_on_first_level_loaded").bind(), CONNECT_ONE_SHOT)
 	load_level(start_level_scn)
-	
+	LoadScene.clear_data()
 	BackgroundMusic.stop()
 
 
@@ -81,7 +83,6 @@ func _input(event):
 func set_brightness():
 	# Set game brightness/gamma
 	world_environment.environment.tonemap_exposure = VideoSettings.brightness
-
 
 func load_level(packed : PackedScene):
 	if _loaded_levels[current_floor_level] == null:
@@ -125,15 +126,13 @@ func load_level(packed : PackedScene):
 	
 	emit_signal("level_loaded", level)
 
-
 func spawn_player():
 	player = player_scn.instantiate()
 	level.set_player_on_spawn_position(player, true)
 	world_root.call_deferred("add_child", player)
 	await player.ready
+	load_screen.hide()
 	emit_signal("player_spawned", player)
-	
-	LoadScene.emit_signal("scene_loaded")
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -159,8 +158,8 @@ func disconnect_staircase_events() -> void:
 		# warning-ignore:return_value_discarded
 		Events.disconnect("down_staircase_used", Callable(self, "_on_Events_down_staircase_used"))
 
-func _check_if_loadscreen_freed():
-	return !is_instance_valid(LoadScene.loadscreen)
+func _check_if_loading():
+	return LoadScene.loading
 
 ### -----------------------------------------------------------------------------------------------
 
@@ -168,8 +167,9 @@ func _check_if_loadscreen_freed():
 ### Signal Callbacks ------------------------------------------------------------------------------
 
 func _on_first_level_loaded(_level : GameWorld):
-	spawn_player()
+	load_screen.finish_loading()
 	
+	spawn_player()
 	_connect_staircase_events()
 
 
@@ -177,15 +177,13 @@ func _handle_floor_change(is_going_downstairs: bool) -> void:
 	await _show_load_screen()
 	_handle_floor_levels()
 	await load_level(start_level_scn)
+	load_screen.finish_loading()
 	_set_new_position_for_player(is_going_downstairs)
-	LoadScene.emit_signal("scene_loaded")
-
 
 func _show_load_screen() -> void:
-	LoadScene.setup_loadscreen()
 	# Wait a bit so that the load screen is visible
+	load_screen.show_message()
 	await get_tree().create_timer(0.1).timeout
-
 
 func _handle_floor_levels() -> void:
 	world_root.remove_child(level)
@@ -198,11 +196,14 @@ func _handle_floor_levels() -> void:
 
 func _set_new_position_for_player(is_going_downstairs: bool) -> void:
 	level.set_player_on_spawn_position(player, is_going_downstairs)
+	load_screen.finish_loading()
+	await load_screen.clicked
+	load_screen.hide()
+	load_screen.clear_data()
 	emit_signal("player_spawned", player)
 
-
 func _on_Events_up_staircase_used() -> void:
-	if _check_if_loadscreen_freed():   # Wait a few seconds before can go back up
+	if not _check_if_loading():   # Wait a few seconds before can go back up
 		var old_value := current_floor_level
 		current_floor_level = int(min(HIGHEST_FLOOR_LEVEL, current_floor_level + 1))
 		var has_changed := old_value != current_floor_level
@@ -219,7 +220,7 @@ func _on_Events_up_staircase_used() -> void:
 
 
 func _on_Events_down_staircase_used() -> void:
-	if _check_if_loadscreen_freed():   # Wait a few seconds before can go back down
+	if not _check_if_loading():   # Wait a few seconds before can go back down
 		var old_value := current_floor_level
 		current_floor_level = int(max(LOWEST_FLOOR_LEVEL, current_floor_level - 1))
 		var has_changed := old_value != current_floor_level

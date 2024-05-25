@@ -385,6 +385,8 @@ func _get_surface_type() -> Array:
 
 func _walk(delta, speed_mod : float = 1.0) -> void:
 	move_dir = state.move_direction
+	if (move_dir.length_squared() != 0):
+		$Audio.play_footstep_sound()
 	move_dir = move_dir.rotated(Vector3.UP, rotation.y)
 	
 	if do_sprint and stamina > 0 and is_reloading == false and is_moving_forward:
