@@ -17,16 +17,20 @@ var error
 
 signal clicked
 
-func _ready():
-	label.text = "Loading..."
-	if(LoadScene.loading and LoadScene.next_scene.length() > 0):
-		start_loading()
+#func _ready():
+	
+	#if(LoadScene.loading and LoadScene.next_scene.length() > 0):
+	#	start_loading()
+	#setup_loading_screen()
+
 
 func _input(event: InputEvent):
 	if (event is InputEventMouseButton and event.is_pressed() and loading_done):
-		print("calicada")
-		clicked.emit()
-		get_tree().paused = false
+		loading_done = false 
+		handle_external_settings()
+		fade_out()
+		await clicked
+		
 		##For when changing to a different scene, so we spawned the load screen
 		# with the LoadScene.change_scene_to_file()
 		if(LoadScene.target_node == null):
@@ -39,6 +43,7 @@ func _input(event: InputEvent):
 			LoadScene.clear_data()
 			#clear_data()
 
+
 func start_loading():
 	#With the suggestion from line 3, this is not required anymore. 
 	#The randomize method is somewhat expensive to run, so running it 
@@ -47,6 +52,7 @@ func start_loading():
 	show_message()
 	load_scene()
 	load_timer.start()
+
 
 func load_scene():
 	next_scene_path = LoadScene.next_scene
@@ -57,10 +63,9 @@ func load_scene():
 	else:
 		error = ResourceLoader.load_threaded_request(next_scene_path)
 
+
 func show_message():
-	label.text = "Loading..."
-	LoadScene.loading = true
-	loading_done = false
+	setup_loading_screen()
 	#Level 2, or 4 or whatever would be better as predefined constants
 	if GameManager.act > 4:
 		# late game
@@ -77,6 +82,7 @@ func show_message():
 	
 	show()
 	#get_tree().paused = true
+	
 	
 func _on_load_timer_timeout():
 	#Every 0.5s, check if the next scene has loaded yet
@@ -100,12 +106,48 @@ func _on_load_timer_timeout():
 	if !loading_done:
 		load_timer.start()
 
+
 func finish_loading():
 	loading_done = true
 	label.text = "Click to Continue"
+
 
 func clear_data():
 	loading_done = false
 	next_scene_path = ""
 	next_scene = null
 	LoadScene.clear_data()
+
+
+func setup_loading_screen():
+	label.text = "Loading..."
+	color_rect.modulate = Color.from_hsv(1,1,1,1)
+	LoadScene.loading = true
+	loading_done = false
+
+
+func handle_external_settings():
+	AudioSettings.internal_effects_volume = 0.0
+	
+	get_tree().create_tween()\
+		.tween_property(AudioSettings, "internal_effects_volume", 1.0, 5.0)\
+		.set_trans(Tween.TRANS_EXPO)\
+		.set_ease(Tween.EASE_IN)
+		
+	if GameManager.game != null and GameManager.game.player != null:
+		GameManager.game.player.player_controller.no_click_after_load_period = true
+		await get_tree().create_timer(1).timeout   # Possibly 0.5 better?
+		GameManager.game.player.player_controller.no_click_after_load_period = false
+
+
+func fade_out():
+	#hide the texts to show black screen
+	label.text = ""
+	quote.text = ""
+	color_rect.modulate = Color.from_hsv(1,1,1,1)
+	get_tree().paused = false
+	var tween = get_tree().create_tween()
+	tween.set_trans(Tween.TRANS_EXPO)
+	tween.tween_property(color_rect, "modulate", Color.from_hsv(1,1,1,0), 1)
+	await tween.finished
+	clicked.emit()

@@ -57,6 +57,7 @@ func _init():
 func _ready():
 	
 	set_brightness()
+	load_screen.show_message()
 	for floor_index in range(HIGHEST_FLOOR_LEVEL, LOWEST_FLOOR_LEVEL - 1, -1):
 		_loaded_levels[floor_index] = null
 	
@@ -83,6 +84,7 @@ func _input(event):
 func set_brightness():
 	# Set game brightness/gamma
 	world_environment.environment.tonemap_exposure = VideoSettings.brightness
+
 
 func load_level(packed : PackedScene):
 	if _loaded_levels[current_floor_level] == null:
@@ -126,11 +128,13 @@ func load_level(packed : PackedScene):
 	
 	emit_signal("level_loaded", level)
 
+
 func spawn_player():
 	player = player_scn.instantiate()
 	level.set_player_on_spawn_position(player, true)
 	world_root.call_deferred("add_child", player)
 	await player.ready
+	await load_screen.clicked
 	load_screen.hide()
 	emit_signal("player_spawned", player)
 
@@ -168,7 +172,6 @@ func _check_if_loading():
 
 func _on_first_level_loaded(_level : GameWorld):
 	load_screen.finish_loading()
-	
 	spawn_player()
 	_connect_staircase_events()
 
@@ -201,6 +204,7 @@ func _set_new_position_for_player(is_going_downstairs: bool) -> void:
 	load_screen.hide()
 	load_screen.clear_data()
 	emit_signal("player_spawned", player)
+
 
 func _on_Events_up_staircase_used() -> void:
 	if not _check_if_loading():   # Wait a few seconds before can go back up
