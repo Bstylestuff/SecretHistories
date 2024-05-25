@@ -93,7 +93,8 @@ func play_throw_sound():
 
 
 func play_drop_sound(body):
-	if !is_instance_valid(LoadScene.loadscreen):   # If it's at least a few seconds after level load
+	
+	if (!LoadScene.loading):   # If it's at least a few seconds after level load
 		if self.item_drop_sound and self.audio_player and self.linear_velocity.length() > 0.2 and self.is_soundplayer_ready:
 			self.audio_player.stream = self.item_drop_sound
 			

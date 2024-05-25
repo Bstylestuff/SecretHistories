@@ -248,6 +248,8 @@ func _walk(delta) -> void:
 	move_dir.x = (Input.get_action_strength("movement|move_right") - Input.get_action_strength("movement|move_left"))
 	move_dir.z = (Input.get_action_strength("movement|move_down") - Input.get_action_strength("movement|move_up"))
 	character.state.move_direction = move_dir.normalized()
+	if (move_dir.length_squared() != 0):
+		get_parent().get_node("Audio").play_footstep_sound()
 	
 	# This logic has the player kick if they hit sprint and release it without moving
 	if Input.is_action_pressed("player|sprint"):
