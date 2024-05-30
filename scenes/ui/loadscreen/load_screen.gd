@@ -24,7 +24,7 @@ func _input(event: InputEvent):
 		handle_external_settings()
 		fade_out()
 		await clicked
-		
+		LoadScene.clear_data()
 		##For when changing to a different scene, so we spawned the load screen
 		# with the LoadScene.change_scene_to_file()
 		if(LoadScene.target_node == null):

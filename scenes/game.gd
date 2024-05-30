@@ -64,7 +64,6 @@ func _ready():
 	await get_tree().create_timer(1).timeout
 	var _error = connect("level_loaded", Callable(self, "_on_first_level_loaded").bind(), CONNECT_ONE_SHOT)
 	load_level(start_level_scn)
-	LoadScene.clear_data()
 	BackgroundMusic.stop()
 
 
