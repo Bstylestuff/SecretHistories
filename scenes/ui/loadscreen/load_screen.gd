@@ -17,12 +17,6 @@ var error
 
 signal clicked
 
-#func _ready():
-	
-	#if(LoadScene.loading and LoadScene.next_scene.length() > 0):
-	#	start_loading()
-	#setup_loading_screen()
-
 
 func _input(event: InputEvent):
 	if (event is InputEventMouseButton and event.is_pressed() and loading_done):
